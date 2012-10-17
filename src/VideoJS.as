@@ -5,12 +5,16 @@ package{
     import com.videojs.VideoJSView;
     import com.videojs.events.VideoJSEvent;
     import com.videojs.structs.ExternalErrorEventName;
-    
+
+    import flash.display.Bitmap;
     import flash.display.Sprite;
     import flash.display.StageAlign;
+    import flash.display.StageDisplayState;
     import flash.display.StageScaleMode;
     import flash.events.Event;
+    import flash.events.FullScreenEvent;
     import flash.events.IEventDispatcher;
+    import flash.events.MouseEvent;
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
     import flash.geom.Rectangle;
@@ -23,7 +27,14 @@ package{
     
     [SWF(backgroundColor="#000000", frameRate="60", width="480", height="270")]
     public class VideoJS extends Sprite{
-        
+        [Embed (source = "img/fullscreen-back.png")] private static var FullScreen:Class;
+        private static var fullScreenBmp:Bitmap = new FullScreen();
+
+        [Embed (source = "img/leave-fullscreen.png")] private static var LeaveFullScreen:Class;
+        private static var leaveFullScreenBmp:Bitmap = new LeaveFullScreen();
+
+        private static var fullScreenBtn:Sprite = new Sprite();
+
         private var _app:VideoJSApp;
         private var _stageSizeTimer:Timer;
         
@@ -50,13 +61,35 @@ package{
             _app = new VideoJSApp();
             addChild(_app);
 
+            fullScreenBmp.x = stage.stageWidth - 23;
+            fullScreenBmp.y = stage.stageHeight - 23;
+            fullScreenBmp.width = 13;
+            fullScreenBmp.height = 13;
+
+            fullScreenBtn.addChild(fullScreenBmp);
+
+            fullScreenBtn.addEventListener(MouseEvent.CLICK, fullScreenClick);
+
+            stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenChange);
+
+//            fullScreenBtn.addEventListener(MouseEvent.CLICK, fullScreenClick);
+            addChild(fullScreenBtn);
+
             _app.model.stageRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 
             var _ctxMenu:ContextMenu = new ContextMenu();
             _ctxMenu.hideBuiltInItems();
             this.contextMenu = _ctxMenu;
         }
-        
+
+        private function fullScreenChange():void {
+            fullScreenBtn.visible = !fullScreenBtn.visible;
+        }
+
+        private function fullScreenClick(e:MouseEvent):void {
+            stage.displayState = StageDisplayState.FULL_SCREEN;
+        }
+
         private function registerExternalMethods():void{
             
             try{
