@@ -52,14 +52,9 @@ package{
 
             _app.model.stageRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 
-            // add content-menu version info
-            var _ctxVersion:ContextMenuItem = new ContextMenuItem("VideoJS Flash Component v3.0.1", false, false);
-            var _ctxAbout:ContextMenuItem = new ContextMenuItem("Copyright © 2012 Zencoder, Inc.", false, false);
             var _ctxMenu:ContextMenu = new ContextMenu();
             _ctxMenu.hideBuiltInItems();
-            _ctxMenu.customItems.push(_ctxVersion, _ctxAbout);
             this.contextMenu = _ctxMenu;
-
         }
         
         private function registerExternalMethods():void{
