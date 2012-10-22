@@ -30,16 +30,22 @@ package{
         [Embed (source = "img/fullscreen-back.png")] private static var FullScreen:Class;
         private static var fullScreenBmp:Bitmap = new FullScreen();
 
-        [Embed (source = "img/leave-fullscreen.png")] private static var LeaveFullScreen:Class;
-        private static var leaveFullScreenBmp:Bitmap = new LeaveFullScreen();
+//        [Embed (source = "img/leave-fullscreen.png")] private static var LeaveFullScreen:Class;
+//        private static var leaveFullScreenBmp:Bitmap = new LeaveFullScreen();
 
         private static var fullScreenBtn:Sprite = new Sprite();
 
         private var _app:VideoJSApp;
         private var _stageSizeTimer:Timer;
+
+        private function debug(info:String):void {
+            if (ExternalInterface.available) {
+                ExternalInterface.call('console.log', info);
+            }
+        }
         
         public function VideoJS(){
-            _stageSizeTimer = new Timer(250);
+            _stageSizeTimer = new Timer(150);
             _stageSizeTimer.addEventListener(TimerEvent.TIMER, onStageSizeTimerTick);
             addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
         }
@@ -57,14 +63,14 @@ package{
             if(ExternalInterface.available){
                 registerExternalMethods();
             }
-            
+
+            // TODO: controls, pointer cursor
             _app = new VideoJSApp();
             addChild(_app);
 
-            fullScreenBmp.x = stage.stageWidth - 23;
-            fullScreenBmp.y = stage.stageHeight - 23;
-            fullScreenBmp.width = 13;
-            fullScreenBmp.height = 13;
+            fullScreenBmp.width = 35;
+            fullScreenBmp.height = 63;
+            positionControls();
 
             fullScreenBtn.addChild(fullScreenBmp);
 
@@ -72,7 +78,6 @@ package{
 
             stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenChange);
 
-//            fullScreenBtn.addEventListener(MouseEvent.CLICK, fullScreenClick);
             addChild(fullScreenBtn);
 
             _app.model.stageRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
@@ -82,11 +87,18 @@ package{
             this.contextMenu = _ctxMenu;
         }
 
-        private function fullScreenChange():void {
-            fullScreenBtn.visible = !fullScreenBtn.visible;
+        private function positionControls():void {
+            fullScreenBmp.x = stage.stageWidth - fullScreenBmp.width;
+            fullScreenBmp.y = stage.stageHeight - fullScreenBmp.height;
+        }
+
+        private function fullScreenChange(event:FullScreenEvent):void {
+//            debug('full screen: ' + event.fullScreen ? 'enter' : 'exit');
+            fullScreenBtn.visible = !event.fullScreen;
         }
 
         private function fullScreenClick(e:MouseEvent):void {
+//            debug('full screen click');
             stage.displayState = StageDisplayState.FULL_SCREEN;
         }
 
@@ -103,6 +115,8 @@ package{
                 ExternalInterface.addCallback("vjs_pause", onPauseCalled);
                 ExternalInterface.addCallback("vjs_resume", onResumeCalled);
                 ExternalInterface.addCallback("vjs_stop", onStopCalled);
+                ExternalInterface.addCallback("vjs_hideControls", onHideControls);
+                ExternalInterface.addCallback("vjs_showControls", onShowControls);
             }
             catch(e:SecurityError){
                 if (loaderInfo.parameters.debug != undefined && loaderInfo.parameters.debug == "true") {
@@ -116,10 +130,7 @@ package{
             }
             finally{}
             
-            
-            
             setTimeout(finish, 50);
-
         }
         
         private function finish():void{
@@ -192,6 +203,7 @@ package{
                 _app.model.stageRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
                 _app.model.broadcastEvent(new VideoJSEvent(VideoJSEvent.STAGE_RESIZE, {}));
             }
+            positionControls();
         }
         
         private function onEchoCalled(pResponse:* = null):*{
@@ -359,10 +371,17 @@ package{
         private function onStopCalled():void{
             _app.model.stop();
         }
-        
-        private function onUncaughtError(e:Event):void{
+
+        private function onUncaughtError(e:Event):void {
             e.preventDefault();
         }
-        
+
+        private function onShowControls():void {
+            fullScreenBtn.visible = true;
+        }
+
+        private function onHideControls():void {
+            fullScreenBtn.visible = false;
+        }
     }
 }
