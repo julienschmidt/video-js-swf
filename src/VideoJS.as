@@ -35,14 +35,16 @@ package{
 
         private static var fullScreenBtn:Sprite = new Sprite();
 
+        private var isFullScreen:Boolean = false;
+
         private var _app:VideoJSApp;
         private var _stageSizeTimer:Timer;
 
-        private function debug(info:String):void {
-            if (ExternalInterface.available) {
-                ExternalInterface.call('console.log', info);
-            }
-        }
+//        private function debug(info:String):void {
+//            if (ExternalInterface.available) {
+//                ExternalInterface.call('console.log', info);
+//            }
+//        }
         
         public function VideoJS(){
             _stageSizeTimer = new Timer(150);
@@ -77,6 +79,7 @@ package{
             fullScreenBtn.addEventListener(MouseEvent.CLICK, fullScreenClick);
 
             stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenChange);
+            stage.addEventListener(MouseEvent.CLICK, stageClick);
 
             addChild(fullScreenBtn);
 
@@ -93,13 +96,28 @@ package{
         }
 
         private function fullScreenChange(event:FullScreenEvent):void {
+            isFullScreen = event.fullScreen;
 //            debug('full screen: ' + event.fullScreen ? 'enter' : 'exit');
-            fullScreenBtn.visible = !event.fullScreen;
+            fullScreenBtn.visible = !isFullScreen;
         }
 
         private function fullScreenClick(e:MouseEvent):void {
+            e.stopImmediatePropagation();
 //            debug('full screen click');
             stage.displayState = StageDisplayState.FULL_SCREEN;
+        }
+
+        private function stageClick(e:MouseEvent):void {
+            if (!isFullScreen) {
+//                debug('stage click - return')
+                return;
+            }
+//            debug('stage click - toggle')
+            if (_app.model.paused) {
+                _app.model.play();
+            } else {
+                _app.model.pause();
+            }
         }
 
         private function registerExternalMethods():void{
