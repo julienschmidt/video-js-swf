@@ -45,11 +45,6 @@ section{
   width: 900px;
 }
 
-#videoPlayerWrapper{
-  width: 480px;
-  height: 270px;
-}
-
 #status{
   width: 300px;
   height: 270px;
@@ -68,10 +63,17 @@ section{
 }
 
 #videoPlayerWrapper{
-  width:480px;
-  height:270px;
-  border: 1px dashed #fff;
-  background: #999;
+    border: 1px dashed #fff;
+    background: #999;
+    /*width: 480px;*/
+    /*height: 270px;*/
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 350px;
+    right: 350px;
 }
 
 div.tab-control ul{

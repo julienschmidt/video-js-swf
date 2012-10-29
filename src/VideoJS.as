@@ -1,5 +1,7 @@
 package{
-    
+    import com.aframe.Controls;
+    import com.aframe.ImageButton;
+
     import com.videojs.VideoJSApp;
     import com.videojs.VideoJSModel;
     import com.videojs.VideoJSView;
@@ -27,25 +29,13 @@ package{
     
     [SWF(backgroundColor="#000000", frameRate="60", width="480", height="270")]
     public class VideoJS extends Sprite{
-        [Embed (source = "img/fullscreen-back.png")] private static var FullScreen:Class;
-        private static var fullScreenBmp:Bitmap = new FullScreen();
-
-//        [Embed (source = "img/leave-fullscreen.png")] private static var LeaveFullScreen:Class;
-//        private static var leaveFullScreenBmp:Bitmap = new LeaveFullScreen();
-
-        private static var fullScreenBtn:Sprite = new Sprite();
+        private static var controls:Controls = new Controls();
 
         private var isFullScreen:Boolean = false;
 
         private var _app:VideoJSApp;
         private var _stageSizeTimer:Timer;
 
-//        private function debug(info:String):void {
-//            if (ExternalInterface.available) {
-//                ExternalInterface.call('console.log', info);
-//            }
-//        }
-        
         public function VideoJS(){
             _stageSizeTimer = new Timer(150);
             _stageSizeTimer.addEventListener(TimerEvent.TIMER, onStageSizeTimerTick);
@@ -66,22 +56,16 @@ package{
                 registerExternalMethods();
             }
 
-            // TODO: controls, pointer cursor
             _app = new VideoJSApp();
             addChild(_app);
 
-            fullScreenBmp.width = 35;
-            fullScreenBmp.height = 63;
+            addChild(controls);
             positionControls();
 
-            fullScreenBtn.addChild(fullScreenBmp);
-
-            fullScreenBtn.addEventListener(MouseEvent.CLICK, fullScreenClick);
+            controls.addFullScreenClickListener(fullScreenClick);
 
             stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenChange);
             stage.addEventListener(MouseEvent.CLICK, stageClick);
-
-            addChild(fullScreenBtn);
 
             _app.model.stageRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 
@@ -91,14 +75,13 @@ package{
         }
 
         private function positionControls():void {
-            fullScreenBmp.x = stage.stageWidth - fullScreenBmp.width;
-            fullScreenBmp.y = stage.stageHeight - fullScreenBmp.height;
+            controls.resizeToFitStage(stage.stageWidth, stage.stageHeight);
         }
 
         private function fullScreenChange(event:FullScreenEvent):void {
             isFullScreen = event.fullScreen;
+            controls.render(stage.stageWidth, stage.stageHeight, isFullScreen);
 //            debug('full screen: ' + event.fullScreen ? 'enter' : 'exit');
-            fullScreenBtn.visible = !isFullScreen;
         }
 
         private function fullScreenClick(e:MouseEvent):void {
@@ -390,16 +373,16 @@ package{
             _app.model.stop();
         }
 
-        private function onUncaughtError(e:Event):void {
-            e.preventDefault();
-        }
+//        private function onUncaughtError(e:Event):void {
+//            e.preventDefault();
+//        }
 
         private function onShowControls():void {
-            fullScreenBtn.visible = true;
+            controls.show();
         }
 
         private function onHideControls():void {
-            fullScreenBtn.visible = false;
+            controls.hide();
         }
     }
 }
