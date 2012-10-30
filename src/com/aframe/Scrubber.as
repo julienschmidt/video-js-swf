@@ -17,7 +17,7 @@ package com.aframe {
 
         public function render(w:Number, h:Number, position:Number = 0):void {
             g.clear();
-            Utils.drawRectangle(g, 0, 0, w, h, 0x333333);
+            Utils.drawRectangle(g, 0, 0, w, h, 0x666666);
 
             if (position != 0) {
                 Utils.drawRectangle(g, 0, 0, w * position, h, 0x1CBCDE);
@@ -28,13 +28,14 @@ package com.aframe {
         }
 
         private function clickHandler(e:MouseEvent):void {
-            var pos:Number = e.localX / this.width;
+            var pos:Number = Utils.normalize(e.localX / this.width);
             this.dispatchEvent(new ScrubberEvent(pos));
         }
 
         public function setPosition(position:Number):void {
+            position = Utils.normalize(position);
+
             render(this.width, this.height, position);
         }
-
     }
 }

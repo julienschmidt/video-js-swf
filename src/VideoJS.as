@@ -1,6 +1,8 @@
 package{
     import com.aframe.Controls;
     import com.aframe.ImageButton;
+    import com.aframe.ScrubberEvent;
+    import com.aframe.Utils;
 
     import com.videojs.VideoJSApp;
     import com.videojs.VideoJSModel;
@@ -29,7 +31,7 @@ package{
     
     [SWF(backgroundColor="#000000", frameRate="60", width="480", height="270")]
     public class VideoJS extends Sprite{
-        private static var controls:Controls = new Controls();
+        private var controls:Controls = new Controls();
 
         private var isFullScreen:Boolean = false;
 
@@ -37,9 +39,13 @@ package{
         private var _stageSizeTimer:Timer;
 
         public function VideoJS(){
-            _stageSizeTimer = new Timer(150);
-            _stageSizeTimer.addEventListener(TimerEvent.TIMER, onStageSizeTimerTick);
-            addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+            try {
+                _stageSizeTimer = new Timer(150);
+                _stageSizeTimer.addEventListener(TimerEvent.TIMER, onStageSizeTimerTick);
+                addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+            } catch (e:Error) {
+                Utils.debug('error: ' + e.message);
+            }
         }
         
         private function init():void{
@@ -47,9 +53,9 @@ package{
             Security.allowDomain("*");
             Security.allowInsecureDomain("*");
 
-            if(loaderInfo.hasOwnProperty("uncaughtErrorEvents")){
-                // we'll want to suppress ANY uncaught debug errors in production (for the sake of ux)
-                // IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", onUncaughtError);
+            if (loaderInfo.hasOwnProperty("uncaughtErrorEvents")){
+                // we'll want to suppress ANY uncaught .debug errors in production (for the sake of ux)
+                IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", onUncaughtError);
             }
             
             if(ExternalInterface.available){
@@ -62,9 +68,15 @@ package{
             addChild(controls);
             positionControls();
 
-            controls.addFullScreenClickListener(fullScreenClick);
+            controls.addFullScreenClickListener(onFullScreenClick);
+            controls.addLeaveFullScreenClickListener(onLeaveFullScreenClick);
+            controls.addPlayClickListener(onPlayClick);
+            controls.addPauseClickListener(onPauseClick);
 
-            stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenChange);
+            controls.addVolumeListener(onVolume);
+            controls.addSeekListener(onSeek);
+
+            stage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullScreenChange);
             stage.addEventListener(MouseEvent.CLICK, stageClick);
 
             _app.model.stageRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
@@ -78,29 +90,66 @@ package{
             controls.resizeToFitStage(stage.stageWidth, stage.stageHeight);
         }
 
-        private function fullScreenChange(event:FullScreenEvent):void {
+        private function onFullScreenChange(event:FullScreenEvent):void {
             isFullScreen = event.fullScreen;
             controls.render(stage.stageWidth, stage.stageHeight, isFullScreen);
-//            debug('full screen: ' + event.fullScreen ? 'enter' : 'exit');
+            controls.setVolumePosition(_app.model.volume);
+            displayCorrectSeekPosition();
+            if (_app.model.paused) {
+                controls.showPlayButton();
+            } else {
+                controls.showPauseButton();
+            }
+//            Utils.debug('full screen: ' + event.fullScreen ? 'enter' : 'exit');
         }
 
-        private function fullScreenClick(e:MouseEvent):void {
-            e.stopImmediatePropagation();
-//            debug('full screen click');
+        private function displayCorrectSeekPosition():void {
+            controls.setSeekPosition(_app.model.time / _app.model.duration);
+        }
+
+        private function onFullScreenClick(e:MouseEvent):void {
+//            Utils.debug('full screen click');
             stage.displayState = StageDisplayState.FULL_SCREEN;
+        }
+
+        private function onLeaveFullScreenClick(e:MouseEvent):void {
+//            Utils.debug('full screen click');
+            stage.displayState = StageDisplayState.NORMAL;
         }
 
         private function stageClick(e:MouseEvent):void {
             if (!isFullScreen) {
-//                debug('stage click - return')
+//                Utils.debug('stage click - return')
                 return;
             }
-//            debug('stage click - toggle')
+//            Utils.debug('stage click - toggle')
             if (_app.model.paused) {
                 _app.model.play();
+                controls.showPauseButton();
             } else {
                 _app.model.pause();
+                controls.showPlayButton();
             }
+        }
+
+        private function onPlayClick(e:MouseEvent):void {
+            _app.model.play();
+            controls.showPauseButton();
+        }
+
+        private function onPauseClick(e:MouseEvent):void {
+            _app.model.pause();
+            controls.showPlayButton();
+        }
+
+        private function onVolume(e:ScrubberEvent):void {
+            _app.model.volume = e.position;
+            controls.setVolumePosition(_app.model.volume);
+        }
+
+        private function onSeek(e:ScrubberEvent):void {
+            _app.model.seekByPercent(e.position);
+            setTimeout(displayCorrectSeekPosition, 50);
         }
 
         private function registerExternalMethods():void{
@@ -125,6 +174,7 @@ package{
                 }
             }
             catch(e:Error){
+                Utils.debug(e.message);
                 if (loaderInfo.parameters.debug != undefined && loaderInfo.parameters.debug == "true") {
                     throw new Error(e.message);
                 }
@@ -239,6 +289,7 @@ package{
                     return _app.model.src;
                     break;
                 case "currentTime":
+                    displayCorrectSeekPosition();
                     return _app.model.time;
                     break;
                 case "time":
@@ -326,12 +377,14 @@ package{
                     break;
                 case "currentPercent":
                     _app.model.seekByPercent(Number(pValue));
+                    controls.setSeekPosition(Number(pValue));
                     break;
                 case "muted":
                     _app.model.muted = _app.model.humanToBoolean(pValue);
                     break;
                 case "volume":
                     _app.model.volume = Number(pValue);
+                    controls.setVolumePosition(Number(pValue));
                     break;
                 case "RTMPConnection":
                     _app.model.rtmpConnectionURL = String(pValue);
@@ -368,14 +421,15 @@ package{
         private function onResumeCalled():void{
             _app.model.resume();
         }
-        
-        private function onStopCalled():void{
+
+        private function onStopCalled():void {
             _app.model.stop();
         }
 
-//        private function onUncaughtError(e:Event):void {
+        private function onUncaughtError(e:Event):void {
 //            e.preventDefault();
-//        }
+            Utils.debug('uncaught error: ' + e.toString());
+        }
 
         private function onShowControls():void {
             controls.show();

@@ -17,5 +17,9 @@ package com.aframe {
             }
         }
 
+        public static function normalize(val:Number):Number {
+            return Math.max(0, Math.min(1, val));
+        }
+
     }
 }

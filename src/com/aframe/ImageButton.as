@@ -7,7 +7,9 @@ package com.aframe {
 
     public class ImageButton extends Button {
 
-        public function ImageButton(img:Class, width:Number, height:Number) {
+        public function ImageButton(img:Class, width:Number, height:Number, clickable:Boolean = true) {
+            super(clickable);
+
             var bmp:Bitmap = new img();
             bmp.width = width;
             bmp.height = height;

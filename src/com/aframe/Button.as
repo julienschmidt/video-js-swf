@@ -7,9 +7,11 @@ package com.aframe {
 
     public class Button extends Sprite {
 
-        public function Button() {
-            this.addEventListener(MouseEvent.MOUSE_OVER, showPointerCursor);
-            this.addEventListener(MouseEvent.MOUSE_OUT, showStandardCursor);
+        public function Button(clickable:Boolean = true) {
+            if (clickable) {
+                this.addEventListener(MouseEvent.MOUSE_OVER, showPointerCursor);
+                this.addEventListener(MouseEvent.MOUSE_OUT, showStandardCursor);
+            }
         }
 
         private static function showPointerCursor(e:MouseEvent):void {
