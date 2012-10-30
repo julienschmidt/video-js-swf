@@ -39,13 +39,9 @@ package{
         private var _stageSizeTimer:Timer;
 
         public function VideoJS(){
-            try {
-                _stageSizeTimer = new Timer(150);
-                _stageSizeTimer.addEventListener(TimerEvent.TIMER, onStageSizeTimerTick);
-                addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
-            } catch (e:Error) {
-                Utils.debug('error: ' + e.message);
-            }
+            _stageSizeTimer = new Timer(150);
+            _stageSizeTimer.addEventListener(TimerEvent.TIMER, onStageSizeTimerTick);
+            addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
         }
         
         private function init():void{
@@ -53,10 +49,10 @@ package{
             Security.allowDomain("*");
             Security.allowInsecureDomain("*");
 
-            if (loaderInfo.hasOwnProperty("uncaughtErrorEvents")){
-                // we'll want to suppress ANY uncaught .debug errors in production (for the sake of ux)
-                IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", onUncaughtError);
-            }
+//            if (loaderInfo.hasOwnProperty("uncaughtErrorEvents")){
+//                // we'll want to suppress ANY uncaught .debug errors in production (for the sake of ux)
+//                IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", onUncaughtError);
+//            }
             
             if(ExternalInterface.available){
                 registerExternalMethods();
@@ -104,7 +100,10 @@ package{
         }
 
         private function displayCorrectSeekPosition():void {
-            controls.setSeekPosition(_app.model.time / _app.model.duration);
+            var duration:Number = _app.model.duration;
+            var time:Number = _app.model.time;
+            var pos:Number = duration == 0 ? 0 : time / duration;
+            controls.setSeekPosition(pos);
         }
 
         private function onFullScreenClick(e:MouseEvent):void {
@@ -426,10 +425,10 @@ package{
             _app.model.stop();
         }
 
-        private function onUncaughtError(e:Event):void {
+//        private function onUncaughtError(e:Event):void {
 //            e.preventDefault();
-            Utils.debug('uncaught error: ' + e.toString());
-        }
+//            Utils.debug('uncaught error: ' + e.toString());
+//        }
 
         private function onShowControls():void {
             controls.show();
