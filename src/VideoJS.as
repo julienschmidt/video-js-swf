@@ -100,9 +100,10 @@ package{
         }
 
         private function displayCorrectSeekPosition():void {
-            var duration:Number = _app.model.duration;
+            var duration:Number = _app.model.shownDuration;
+            var startTime:Number = _app.model.startTime;
             var time:Number = _app.model.time;
-            var pos:Number = duration == 0 ? 0 : time / duration;
+            var pos:Number = duration == 0 ? 0 : (time - startTime) / duration;
             controls.setSeekPosition(pos);
         }
 
@@ -147,7 +148,16 @@ package{
         }
 
         private function onSeek(e:ScrubberEvent):void {
-            _app.model.seekByPercent(e.position);
+            var duration:Number = _app.model.shownDuration;
+            var startTime:Number = _app.model.startTime;
+            var newTime:Number = startTime + e.position * duration;
+
+            // Don't let video end while scrubbing.
+            if (newTime >= duration) {
+                newTime = newTime - 0.1;
+            }
+
+            _app.model.seekBySeconds(newTime);
             setTimeout(displayCorrectSeekPosition, 50);
         }
 
@@ -166,6 +176,7 @@ package{
                 ExternalInterface.addCallback("vjs_stop", onStopCalled);
                 ExternalInterface.addCallback("vjs_hideControls", onHideControls);
                 ExternalInterface.addCallback("vjs_showControls", onShowControls);
+                ExternalInterface.addCallback("vjs_setStartAndDuration", onSetStartAndDuration);
             }
             catch(e:SecurityError){
                 if (loaderInfo.parameters.debug != undefined && loaderInfo.parameters.debug == "true") {
@@ -376,7 +387,6 @@ package{
                     break;
                 case "currentPercent":
                     _app.model.seekByPercent(Number(pValue));
-                    controls.setSeekPosition(Number(pValue));
                     break;
                 case "muted":
                     _app.model.muted = _app.model.humanToBoolean(pValue);
@@ -429,6 +439,12 @@ package{
 //            e.preventDefault();
 //            Utils.debug('uncaught error: ' + e.toString());
 //        }
+
+        private function onSetStartAndDuration(startTime:Number, duration:Number):void {
+            _app.model.shownDuration = duration;
+            _app.model.startTime = startTime;
+            // Utils.debug('start: ' + startTime + ', duration: ' + duration);
+        }
 
         private function onShowControls():void {
             controls.show();
