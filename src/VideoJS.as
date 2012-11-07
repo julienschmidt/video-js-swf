@@ -118,10 +118,6 @@ package{
         }
 
         private function stageClick(e:MouseEvent):void {
-            if (!isFullScreen) {
-//                Utils.debug('stage click - return')
-                return;
-            }
 //            Utils.debug('stage click - toggle')
             if (_app.model.paused) {
                 _app.model.play();
