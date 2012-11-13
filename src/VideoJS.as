@@ -101,9 +101,8 @@ package{
 
         private function displayCorrectSeekPosition():void {
             var duration:Number = _app.model.shownDuration;
-            var startTime:Number = _app.model.startTime;
             var time:Number = _app.model.time;
-            var pos:Number = duration == 0 ? 0 : (time - startTime) / duration;
+            var pos:Number = duration == 0 ? 0 : time / duration;
             controls.setSeekPosition(pos);
         }
 
@@ -145,8 +144,7 @@ package{
 
         private function onSeek(e:ScrubberEvent):void {
             var duration:Number = _app.model.shownDuration;
-            var startTime:Number = _app.model.startTime;
-            var newTime:Number = startTime + e.position * duration;
+            var newTime:Number = e.position * duration;
 
             // Don't let video end while scrubbing.
             if (newTime >= duration) {
