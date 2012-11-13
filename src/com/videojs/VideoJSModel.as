@@ -54,8 +54,11 @@ package com.videojs{
         private var _rtmpConnectionURL:String = "";
         private var _rtmpStream:String = "";
         private var _poster:String = "";
+
         private var _shownDuration:Number = 0;
         private var _startTime:Number = 0;
+        private var _endTime:Number = 0;
+        private var _subclip:Boolean = false;
         
         private static var _instance:VideoJSModel;
         
@@ -192,9 +195,22 @@ package com.videojs{
         public function get startTime():Number{
             return _startTime;
         }
-
         public function set startTime(value:Number):void {
             _startTime = value;
+        }
+
+        public function get endTime():Number{
+            return _endTime;
+        }
+        public function set endTime(value:Number):void {
+            _endTime = value;
+        }
+
+        public function get subclip():Boolean{
+            return _subclip;
+        }
+        public function set subclip(pValue:Boolean):void{
+            _subclip = pValue;
         }
 
         public function get autoplay():Boolean{

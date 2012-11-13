@@ -172,7 +172,6 @@ package{
                 ExternalInterface.addCallback("vjs_stop", onStopCalled);
                 ExternalInterface.addCallback("vjs_hideControls", onHideControls);
                 ExternalInterface.addCallback("vjs_showControls", onShowControls);
-                ExternalInterface.addCallback("vjs_setStartAndDuration", onSetStartAndDuration);
             }
             catch(e:SecurityError){
                 if (loaderInfo.parameters.debug != undefined && loaderInfo.parameters.debug == "true") {
@@ -215,11 +214,24 @@ package{
             if(loaderInfo.parameters.poster != undefined && loaderInfo.parameters.poster != ""){
                 _app.model.poster = String(loaderInfo.parameters.poster);
             }
-            
-            if(loaderInfo.parameters.src != undefined && loaderInfo.parameters.src != ""){
-                _app.model.srcFromFlashvars = String(loaderInfo.parameters.src);
+
+            _app.model.shownDuration = getValueFromFlashvars('duration');
+            _app.model.startTime = getValueFromFlashvars('startTime');
+            _app.model.endTime = getValueFromFlashvars('endTime');
+
+            if (loaderInfo.parameters.subclip != undefined && loaderInfo.parameters.subclip == "true") {
+                _app.model.subclip = true;
             }
-            else{
+
+            if (loaderInfo.parameters.src != undefined && loaderInfo.parameters.src != "") {
+                var src:String = String(loaderInfo.parameters.src);
+                if (_app.model.subclip) {
+                    src += '&start=' + _app.model.startTime + '&end=' + _app.model.endTime;
+                }
+//                Utils.debug(src);
+                _app.model.srcFromFlashvars = src;
+            }
+            else {
                 if(loaderInfo.parameters.RTMPConnection != undefined && loaderInfo.parameters.RTMPConnection != ""){
                     _app.model.rtmpConnectionURL = loaderInfo.parameters.RTMPConnection;
                 }
@@ -238,6 +250,17 @@ package{
                     }
                 }
             }
+        }
+
+        private function getValueFromFlashvars(name:String):Number {
+            var value:Number = 0;
+            if (loaderInfo.parameters[name] != undefined) {
+                value = Number(loaderInfo.parameters[name]);
+                if (isNaN(value)) {
+                    value = 0;
+                }
+            }
+            return value;
         }
         
         private function onAddedToStage(e:Event):void{
@@ -296,7 +319,7 @@ package{
                     break;
                 case "currentTime":
                     displayCorrectSeekPosition();
-                    return _app.model.time;
+                    return _app.model.time + _app.model.startTime;
                     break;
                 case "time":
                     return _app.model.time;
@@ -376,10 +399,10 @@ package{
                     _app.model.poster = String(pValue);
                     break;
                 case "src":
-                    _app.model.src = String(pValue);
+                    _app.model.src = String(pValue); // TODO: add pseudostreaming support
                     break;
                 case "currentTime":
-                    _app.model.seekBySeconds(Number(pValue));
+                    _app.model.seekBySeconds(Number(pValue) - _app.model.startTime);
                     break;
                 case "currentPercent":
                     _app.model.seekByPercent(Number(pValue));
@@ -406,7 +429,8 @@ package{
         private function onAutoplayCalled(pAutoplay:* = false):void{
             _app.model.autoplay = _app.model.humanToBoolean(pAutoplay);
         }
-        
+
+        // TODO: add pseudostreaming support
         private function onSrcCalled(pSrc:* = ""):void{
             _app.model.src = String(pSrc);
         }
@@ -435,12 +459,6 @@ package{
 //            e.preventDefault();
 //            Utils.debug('uncaught error: ' + e.toString());
 //        }
-
-        private function onSetStartAndDuration(startTime:Number, duration:Number):void {
-            _app.model.shownDuration = duration;
-            _app.model.startTime = startTime;
-            // Utils.debug('start: ' + startTime + ', duration: ' + duration);
-        }
 
         private function onShowControls():void {
             controls.show();
