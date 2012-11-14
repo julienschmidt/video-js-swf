@@ -222,11 +222,8 @@ package{
             }
 
             if (loaderInfo.parameters.src != undefined && loaderInfo.parameters.src != "") {
-                var src:String = String(loaderInfo.parameters.src);
-                if (_app.model.subclip) {
-                    src += '&start=' + _app.model.startTime + '&end=' + _app.model.endTime;
-                }
-//                Utils.debug(src);
+                var src:String = getSrcSupportingPseudostreaming(loaderInfo.parameters.src);
+//                Utils.debug('params: ' + src);
                 _app.model.srcFromFlashvars = src;
             }
             else {
@@ -248,6 +245,13 @@ package{
                     }
                 }
             }
+        }
+
+        private function getSrcSupportingPseudostreaming(src:String):String {
+            if (_app.model.subclip) {
+                src += '&start=' + _app.model.startTime + '&end=' + _app.model.endTime;
+            }
+            return src;
         }
 
         private function getValueFromFlashvars(name:String):Number {
@@ -397,7 +401,8 @@ package{
                     _app.model.poster = String(pValue);
                     break;
                 case "src":
-                    _app.model.src = String(pValue); // TODO: add pseudostreaming support
+                    _app.model.src = getSrcSupportingPseudostreaming(pValue);
+//                    Utils.debug('setter: ' + _app.model.src);
                     break;
                 case "currentTime":
                     _app.model.seekBySeconds(Number(pValue) - _app.model.startTime);
@@ -428,9 +433,9 @@ package{
             _app.model.autoplay = _app.model.humanToBoolean(pAutoplay);
         }
 
-        // TODO: add pseudostreaming support
-        private function onSrcCalled(pSrc:* = ""):void{
-            _app.model.src = String(pSrc);
+        private function onSrcCalled(pSrc:* = ""):void {
+            _app.model.src = getSrcSupportingPseudostreaming(pSrc);
+//            Utils.debug('on src: ' + _app.model.src);
         }
         
         private function onLoadCalled():void{
