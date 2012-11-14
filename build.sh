@@ -7,4 +7,4 @@
 echo "Compiling video-js.swf..."
 
 # Make sure the path to mxmlc is correct!
-~/Work/apps/flex_sdk_4.6/bin/mxmlc ./src/VideoJS.as -o ./bin-release/video-js.swf -use-network=false -static-link-runtime-shared-libraries=true
+~/Work/apps/flex_sdk_4.6/bin/mxmlc ./src/VideoJS.as -o ./bin-release/video-js.swf -debug=false -strict=true -optimize=true -use-network=false -static-link-runtime-shared-libraries=true
