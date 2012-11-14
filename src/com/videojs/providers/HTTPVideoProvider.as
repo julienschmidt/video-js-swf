@@ -322,8 +322,8 @@ package com.videojs.providers{
                 _nc = new NetConnection();
                 _nc.client = this;
                 _nc.addEventListener(NetStatusEvent.NET_STATUS, onNetConnectionStatus);
+                _nc.connect(null);
             }
-            _nc.connect(null);
         }
         
         private function initNetStream():void{
@@ -373,7 +373,6 @@ package com.videojs.providers{
                     initNetStream();
                     break;
                 case "NetConnection.Connect.Failed":
-
                     break;    
             }
             _model.broadcastEvent(new VideoPlaybackEvent(VideoPlaybackEvent.ON_NETCONNECTION_STATUS, {info:e.info}));
