@@ -525,17 +525,6 @@ package com.videojs{
         }
         
         /**
-         * Seeks the currently playing video to the closest keyframe prior to the percent value provided. 
-         * @param pValue A float from 0 to 1 that represents the desired seek percent.
-         * 
-         */        
-        public function seekByPercent(pValue:Number):void{
-            if(_provider){
-                _provider.seekByPercent(pValue);
-            }
-        }
-        
-        /**
          * Stops video playback, clears the video element, and stops any loading proceeses.
          * 
          */        

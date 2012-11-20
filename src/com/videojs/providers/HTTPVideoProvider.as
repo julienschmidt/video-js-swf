@@ -280,24 +280,6 @@ package com.videojs.providers{
             }
         }
         
-        public function seekByPercent(pPercent:Number):void{
-            if(_isPlaying && _metadata.duration != undefined){
-                _isSeeking = true;
-                if(pPercent < 0){
-                    _ns.seek(0);
-                }
-                else if(pPercent > 1){
-                    _throughputTimer.stop();
-                    _ns.seek((pPercent / 100) * _metadata.duration);
-                }
-                else{
-                    _throughputTimer.stop();
-                    _ns.seek(pPercent * _metadata.duration);
-                    
-                }
-            }
-        }
-        
         public function stop():void{
             if(_isPlaying){
                 _ns.close();

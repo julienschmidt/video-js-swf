@@ -310,17 +310,6 @@ package com.videojs.providers{
             }
         }
         
-        public function seekByPercent(pPercent:Number):void{
-            if(_audioPlaybackStarted && _audioDuration > 0){
-                _soundChannel.stop();
-                _soundChannel = _sound.play(pPercent * _audioDuration);
-                _audioPlaybackStarted = true;
-                _audioPlaybackHasEnded = false;
-                _audioPlaybackPaused = false;
-                _model.broadcastEventExternally(ExternalEventName.ON_SEEK_COMPLETE);
-            }
-        }
-        
         public function stop():void{
             if(_audioPlaybackStarted){
                 _soundChannel.stop();

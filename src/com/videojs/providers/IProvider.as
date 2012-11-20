@@ -138,12 +138,7 @@ package com.videojs.providers{
          * Called when the media asset needs to seek to a new time point.
          */
         function seekBySeconds(pTime:Number):void;
-        
-        /**
-         * Called when the media asset needs to seek to a percentage of its total duration.
-         */     
-        function seekByPercent(pPercent:Number):void;
-        
+
         /**
          * Called when the media asset needs to stop.
          */

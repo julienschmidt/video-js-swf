@@ -407,9 +407,6 @@ package{
                 case "currentTime":
                     _app.model.seekBySeconds(Number(pValue) - _app.model.startTime);
                     break;
-                case "currentPercent":
-                    _app.model.seekByPercent(Number(pValue));
-                    break;
                 case "muted":
                     _app.model.muted = _app.model.humanToBoolean(pValue);
                     break;
