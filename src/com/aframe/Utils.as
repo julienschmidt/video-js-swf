@@ -11,9 +11,9 @@ package com.aframe {
             g.endFill();
         }
 
-        public static function debug(info:String):void {
+        public static function debug(info:Object):void {
             if (ExternalInterface.available) {
-                ExternalInterface.call('console.log', info);
+                ExternalInterface.call('console.log', info.toString());
             }
         }
 
