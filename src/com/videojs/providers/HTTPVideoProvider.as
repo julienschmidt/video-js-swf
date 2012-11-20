@@ -198,7 +198,7 @@ package com.videojs.providers{
         
         public function get srcAsString():String{
             if(_src != null){
-                return _src.url;
+                return _src.path;
             }
             return "";
         }
