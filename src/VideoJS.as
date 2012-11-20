@@ -223,7 +223,7 @@ package{
 
             if (loaderInfo.parameters.src != undefined && loaderInfo.parameters.src != "") {
                 var src:String = getSrcSupportingPseudostreaming(loaderInfo.parameters.src);
-//                Utils.debug('params: ' + src);
+                Utils.debug('params: ' + src);
                 _app.model.srcFromFlashvars = src;
             }
             else {
@@ -250,6 +250,7 @@ package{
         private function getSrcSupportingPseudostreaming(src:String):String {
             if (_app.model.subclip) {
                 src += '&start=' + _app.model.startTime + '&end=' + _app.model.endTime;
+                _app.model.modifiedSrc = true;
             }
             return src;
         }
@@ -321,7 +322,7 @@ package{
                     break;
                 case "currentTime":
                     displayCorrectSeekPosition();
-                    return _app.model.time + _app.model.startTime;
+                    return _app.model.timeWithShift;
                     break;
                 case "time":
                     return _app.model.time;
@@ -405,7 +406,7 @@ package{
 //                    Utils.debug('setter: ' + _app.model.src);
                     break;
                 case "currentTime":
-                    _app.model.seekBySeconds(Number(pValue) - _app.model.startTime);
+                    _app.model.seekBySeconds(Number(pValue) - _app.model.startTimeUsedInUrl);
                     break;
                 case "muted":
                     _app.model.muted = _app.model.humanToBoolean(pValue);

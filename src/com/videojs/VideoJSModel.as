@@ -59,7 +59,8 @@ package com.videojs{
         private var _startTime:Number = 0;
         private var _endTime:Number = 0;
         private var _subclip:Boolean = false;
-        
+        private var _modifiedSrc:Boolean = false;
+
         private static var _instance:VideoJSModel;
         
         public function VideoJSModel(pLock:SingletonLock){
@@ -199,6 +200,10 @@ package com.videojs{
             _startTime = value;
         }
 
+        public function get startTimeUsedInUrl():Number{
+            return _modifiedSrc ? _startTime : 0;
+        }
+
         public function get endTime():Number{
             return _endTime;
         }
@@ -211,6 +216,13 @@ package com.videojs{
         }
         public function set subclip(pValue:Boolean):void{
             _subclip = pValue;
+        }
+
+        public function get modifiedSrc():Boolean{
+            return _modifiedSrc;
+        }
+        public function set modifiedSrc(pValue:Boolean):void{
+            _modifiedSrc = pValue;
         }
 
         public function get autoplay():Boolean{
@@ -310,6 +322,10 @@ package com.videojs{
             return 0;
         }
         
+        public function get timeWithShift():Number{
+            return time + startTimeUsedInUrl;
+        }
+
         public function get muted():Boolean{
             return (_volume == 0);
         }
