@@ -13,8 +13,22 @@ package com.aframe {
 
         public static function debug(info:Object):void {
             if (ExternalInterface.available) {
-                ExternalInterface.call('console.log', info.toString());
+                ExternalInterface.call('console.log', debugObject(info));
             }
+        }
+
+        private static function debugObject(obj:Object):String {
+            if (obj == null) {
+                return '[null]'
+            } else if (typeof(obj) === 'string' || typeof(obj) === 'number') {
+                return obj.toString();
+            }
+
+            var s:String = '';
+            for (var i:String in obj) {
+                s += i + ':\r' + debugObject(obj[i]) + '\r'
+            }
+            return s;
         }
 
         public static function normalize(val:Number):Number {
