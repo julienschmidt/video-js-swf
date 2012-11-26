@@ -1,9 +1,12 @@
 package com.videojs{
-    
+
+    import com.aframe.Utils;
+
     import com.videojs.events.VideoJSEvent;
     import com.videojs.events.VideoPlaybackEvent;
     import com.videojs.providers.HTTPAudioProvider;
     import com.videojs.providers.HTTPVideoProvider;
+    import com.videojs.providers.PseudoStreamProvider;
     import com.videojs.providers.IProvider;
     import com.videojs.providers.RTMPVideoProvider;
     import com.videojs.structs.ExternalErrorEventName;
@@ -200,10 +203,6 @@ package com.videojs{
             _startTime = value;
         }
 
-        public function get startTimeUsedInUrl():Number{
-            return _modifiedSrc ? _startTime : 0;
-        }
-
         public function get endTime():Number{
             return _endTime;
         }
@@ -323,7 +322,7 @@ package com.videojs{
         }
         
         public function get timeWithShift():Number{
-            return time + startTimeUsedInUrl;
+            return time + startTime;
         }
 
         public function get muted():Boolean{
@@ -579,13 +578,15 @@ package com.videojs{
             var __src:Object;
             // We need to determine which provider to load, based on the values of our exposed properties.
             switch(_mode){
+                // TODO: handle only PseudoStreaming and HTTP
+                // TODO: check pseudostreaming parameter
                 case PlayerMode.VIDEO:
                     
                     if(_currentPlaybackType == PlaybackType.HTTP){
                         __src = {
                             path: _src
                         };
-                        _provider = new HTTPVideoProvider();
+                        _provider = new PseudoStreamProvider();
                         _provider.attachVideo(_videoReference);
                         _provider.init(__src, _autoplay);
                     }

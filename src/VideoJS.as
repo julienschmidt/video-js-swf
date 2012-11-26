@@ -151,6 +151,8 @@ package{
                 newTime = newTime - 0.1;
             }
 
+//            Utils.debug('Flash scrubber wants seek to ' + newTime);
+
             _app.model.seekBySeconds(newTime);
             setTimeout(displayCorrectSeekPosition, 50);
         }
@@ -249,7 +251,7 @@ package{
 
         private function getSrcSupportingPseudostreaming(src:String):String {
             if (_app.model.subclip) {
-                src += '&start=' + _app.model.startTime + '&end=' + _app.model.endTime;
+                src += '&end=' + _app.model.endTime;
                 _app.model.modifiedSrc = true;
             }
             return src;
@@ -406,7 +408,8 @@ package{
 //                    Utils.debug('setter: ' + _app.model.src);
                     break;
                 case "currentTime":
-                    _app.model.seekBySeconds(Number(pValue) - _app.model.startTimeUsedInUrl);
+//                    Utils.debug('JS wants to seek to: ' + Number(pValue));
+                    _app.model.seekBySeconds(Number(pValue) - _app.model.startTime);
                     break;
                 case "muted":
                     _app.model.muted = _app.model.humanToBoolean(pValue);
