@@ -62,7 +62,6 @@ package com.videojs{
         private var _startTime:Number = 0;
         private var _endTime:Number = 0;
         private var _subclip:Boolean = false;
-        private var _modifiedSrc:Boolean = false;
 
         private static var _instance:VideoJSModel;
         
@@ -215,13 +214,6 @@ package com.videojs{
         }
         public function set subclip(pValue:Boolean):void{
             _subclip = pValue;
-        }
-
-        public function get modifiedSrc():Boolean{
-            return _modifiedSrc;
-        }
-        public function set modifiedSrc(pValue:Boolean):void{
-            _modifiedSrc = pValue;
         }
 
         public function get autoplay():Boolean{

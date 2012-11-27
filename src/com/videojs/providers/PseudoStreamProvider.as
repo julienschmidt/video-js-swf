@@ -75,26 +75,28 @@ package com.videojs.providers{
             _loop = pLoop;
         }
 
-        private var lastTime:Number = 0;
+//        private var lastTime:Number = 0;
         public function get time():Number {
             if (_ns != null) {
                 if (_pausedSeekValue != -1) {
                     return _pausedSeekValue;
                 } else {
-                    var value:Number;
-
                     var t:Number = _serverSeekInProgress ? 0 : _ns.time;
 
-                    if (_seekDataStore) {
-                        value = _seekDataStore.currentPlayheadTime(t, _model.startTime);
-                    } else {
-                        value = _ns.time - _model.startTime;
-                    }
+                    var value:Number = _seekDataStore
+                            ? _seekDataStore.currentPlayheadTime(t, _model.startTime)
+                            : _ns.time - _model.startTime;
 
+                    // TODO: calculate shownDuration based on start and end params in url
                     if (_model.subclip && Math.abs(_model.shownDuration - value) <= 1) {
                         // duration configured and we are reaching the end. Round the value so that end is reached at the correct configured end point.
-                        return Math.round(value);
+                        value = Math.ceil(value);
                     }
+
+//                    if (lastTime != value) {
+//                        Utils.debug('t ' + value);
+//                        lastTime = value;
+//                    }
 
                     return value < 0 ? 0 : value;
                 }
@@ -147,19 +149,17 @@ package com.videojs.providers{
         }
 
         public function get networkState():int{
-            if(!_loadStarted){
+            if (!_loadStarted) {
                 return 0;
             }
-            else{
-                if(_loadCompleted){
-                    return 1;
-                }
-                else if(_loadErrored){
-                    return 3;
-                }
-                else{
-                    return 2;
-                }
+            else if (_loadCompleted) {
+                return 1;
+            }
+            else if (_loadErrored) {
+                return 3;
+            }
+            else {
+                return 2;
             }
         }
 
@@ -173,12 +173,7 @@ package com.videojs.providers{
         }
 
         public function get bufferedBytesEnd():int{
-            if(_loadStarted){
-                return _ns.bytesLoaded;
-            }
-            else{
-                return 0;
-            }
+            return _loadStarted ? _ns.bytesLoaded : 0;
         }
 
         public function get bytesLoaded():int{
@@ -316,13 +311,18 @@ package com.videojs.providers{
             var requestUrl:String = appendQueryString(srcAsString, seconds);
             Utils.debug("doing server seek, url " + requestUrl);
             _serverSeekInProgress = true;
+
+            if (_isPaused) {
+                _pausePending = true;
+            }
             _ns.play(requestUrl);
         }
 
         private function appendQueryString(url:String, start:Number):String {
+            if (start == 0) return url;
+
             var query:String = url + '&start=' + _seekDataStore.getQueryStringStartValue(start);
 
-//            Utils.debug("query string is " + query);
             return query;
         }
 
@@ -442,10 +442,20 @@ package com.videojs.providers{
             _model.broadcastEvent(new VideoPlaybackEvent(VideoPlaybackEvent.ON_NETCONNECTION_STATUS, {info:e.info}));
         }
 
+        private function serverSeekDone():void {
+            if (_serverSeekInProgress) {
+                _serverSeekInProgress = false;
+                _model.broadcastEventExternally(ExternalEventName.ON_SEEK_COMPLETE);
+            }
+        }
+
         private function onNetStreamStatus(e:NetStatusEvent):void{
-            // Utils.debug(e.info.code);
+//            Utils.debug(e.info.code);
+//            Utils.debug('server seek: ' + _serverSeekInProgress);
             switch(e.info.code){
                 case "NetStream.Play.Start":
+                    serverSeekDone();
+
                     _pausedSeekValue = -1;
 //                    _metadata = null;
                     _canPlayThrough = false;
@@ -468,10 +478,12 @@ package com.videojs.providers{
                     _loadStarted = true;
                     break;
 
+                case "NetStream.Buffer.Flush":
+                    _isBuffering = true;
+                    break;
+
                 case "NetStream.Buffer.Full":
-                    if (_serverSeekInProgress) {
-                        _serverSeekInProgress = false;
-                    }
+                    serverSeekDone();
                     _pausedSeekValue = -1;
                     _isBuffering = false;
                     _isPlaying = true;
@@ -491,9 +503,7 @@ package com.videojs.providers{
                     break;
 
                 case "NetStream.Play.Stop":
-                    if (_serverSeekInProgress) {
-                        _serverSeekInProgress = false;
-                    }
+                    serverSeekDone();
                     if(!_loop){
                         _isPlaying = false;
                         _hasEnded = true;
@@ -518,7 +528,6 @@ package com.videojs.providers{
                     _loadStartTimestamp = getTimer();
                     _throughputTimer.reset();
                     _throughputTimer.start();
-
                     break;
 
                 case "NetStream.Play.StreamNotFound":

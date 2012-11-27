@@ -251,8 +251,8 @@ package{
 
         private function getSrcSupportingPseudostreaming(src:String):String {
             if (_app.model.subclip) {
+                // TODO: end used in url should match seekpoint - move this logic to PseudoStreamProvider
                 src += '&end=' + _app.model.endTime;
-                _app.model.modifiedSrc = true;
             }
             return src;
         }
