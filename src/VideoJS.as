@@ -8,6 +8,7 @@ package{
     import com.videojs.VideoJSModel;
     import com.videojs.VideoJSView;
     import com.videojs.events.VideoJSEvent;
+    import com.videojs.structs.ExternalEventName;
     import com.videojs.structs.ExternalErrorEventName;
 
     import flash.display.Bitmap;
@@ -74,6 +75,7 @@ package{
 
             stage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullScreenChange);
             stage.addEventListener(MouseEvent.CLICK, stageClick);
+            stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMove);
 
             _app.model.stageRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 
@@ -124,6 +126,15 @@ package{
             } else {
                 _app.model.pause();
                 controls.showPlayButton();
+            }
+        }
+
+        private var lastMouseReport:Number = 0;
+        private function mouseMove(e:MouseEvent):void {
+            var currentTime:Number = new Date().time;
+            if (currentTime - lastMouseReport > 500) {
+                _app.model.broadcastEventExternally(ExternalEventName.ON_MOUSE_MOVE);
+                lastMouseReport = currentTime;
             }
         }
 

@@ -18,6 +18,7 @@ package com.videojs.structs{
         public static const ON_CAN_PLAY:String = "canplay";
         public static const ON_CAN_PLAY_THROUGH:String = "canplaythrough";
         public static const ON_VOLUME_CHANGE:String = "volumechange";
+        public static const ON_MOUSE_MOVE:String = "mousemoved";
         
         public static const ON_RTMP_CONNECT_SUCCESS:String = "rtmpconnected";
         public static const ON_RTMP_RETRY:String = "rtmpretry";
