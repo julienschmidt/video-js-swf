@@ -13,7 +13,7 @@ package com.aframe {
 
         public static function debug(info:Object):void {
             if (ExternalInterface.available) {
-                ExternalInterface.call('console.log', debugObject(info));
+                ExternalInterface.call('VideoJS.flash.debug', debugObject(info));
             }
         }
 
