@@ -73,6 +73,9 @@ package{
             controls.addVolumeListener(onVolume);
             controls.addSeekListener(onSeek);
 
+            // controls are hidden by default
+            controls.hide();
+
             stage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullScreenChange);
             stage.addEventListener(MouseEvent.CLICK, stageClick);
             stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMove);
