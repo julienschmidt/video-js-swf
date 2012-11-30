@@ -289,7 +289,7 @@ package com.videojs.providers{
         }
 
         private function isInBuffer(seconds:Number):Boolean {
-            if (!_seekDataStore.dataAvailable) {
+            if (!_seekDataStore || !_seekDataStore.dataAvailable) {
                 Utils.debug("No keyframe data available, can only seek inside the buffer");
                 return true;
             }
@@ -332,7 +332,10 @@ package com.videojs.providers{
             //if target is near the end do a server seek to get the correct seekpoint to end correctly.
             if (isInBuffer(target)) {
                 Utils.debug("seeking inside buffer, target " + target + " seconds");
-                _ns.seek(_seekDataStore.inBufferSeekTarget(target));
+                if (_seekDataStore) {
+                    target = _seekDataStore.inBufferSeekTarget(target);
+                }
+                _ns.seek(target);
             } else {
                 serverSeek(_ns, target);
             }
