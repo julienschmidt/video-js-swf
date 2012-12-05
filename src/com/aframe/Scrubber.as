@@ -5,7 +5,7 @@ package com.aframe {
     import flash.display.Graphics;
     import flash.events.MouseEvent;
 
-    public class Scrubber extends Button {
+    public final class Scrubber extends Button {
 
         private var g:Graphics;
 

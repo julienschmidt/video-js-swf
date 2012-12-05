@@ -18,15 +18,23 @@ package com.aframe {
         }
 
         private static function debugObject(obj:Object):String {
+            return JSON ? JSON.stringify(obj) : deepTrace(obj);
+        }
+
+        public static function deepTrace(obj:*, level:int = 0 ):String {
             if (obj == null) {
-                return '[null]'
+                return 'null'
             } else if (typeof(obj) === 'string' || typeof(obj) === 'number') {
                 return obj.toString();
             }
 
-            var s:String = '';
-            for (var i:String in obj) {
-                s += i + ':\r' + debugObject(obj[i]) + '\r'
+            var s:String = "";
+            for (var i:int = 0; i < level; i++) {
+                s += "\t"
+            }
+
+            for (var prop:String in obj) {
+                s += "[" + prop + "] -> " + deepTrace(obj[prop], level + 1);
             }
             return s;
         }

@@ -447,7 +447,8 @@ package com.videojs{
          * 
          */        
         public function broadcastEvent(e:Event):void{
-            dispatchEvent(e); 
+//            Utils.debug(e.type);
+            dispatchEvent(e);
         }
         
         /**
@@ -460,6 +461,7 @@ package com.videojs{
                 if(ExternalInterface.available){
                     var __incomingArgs:* = args as Array;
                     var __newArgs:Array = [_jsEventProxyName, ExternalInterface.objectID].concat(__incomingArgs);
+//                    Utils.debug(__incomingArgs);
                     ExternalInterface.call.apply(null, __newArgs);
                 }
             }

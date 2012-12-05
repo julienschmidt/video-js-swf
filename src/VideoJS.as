@@ -50,10 +50,10 @@ package{
             Security.allowDomain("*");
             Security.allowInsecureDomain("*");
 
-//            if (loaderInfo.hasOwnProperty("uncaughtErrorEvents")){
-//                // we'll want to suppress ANY uncaught .debug errors in production (for the sake of ux)
-//                IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", onUncaughtError);
-//            }
+            if (loaderInfo.hasOwnProperty("uncaughtErrorEvents")){
+                // we'll want to suppress ANY uncaught .debug errors in production (for the sake of ux)
+                IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", onUncaughtError);
+            }
             
             if(ExternalInterface.available){
                 registerExternalMethods();
@@ -105,10 +105,14 @@ package{
         }
 
         private function displayCorrectSeekPosition():void {
+            if (!isFullScreen) {
+                return;
+            }
             var duration:Number = _app.model.shownDuration;
             var time:Number = _app.model.time;
             var pos:Number = duration == 0 ? 0 : time / duration;
             controls.setSeekPosition(pos);
+            stage.invalidate();
         }
 
         private function onFullScreenClick(e:MouseEvent):void {
@@ -188,12 +192,13 @@ package{
                 ExternalInterface.addCallback("vjs_showControls", onShowControls);
             }
             catch(e:SecurityError){
+                Utils.debug('registering external methods error: ' + e.message);
                 if (loaderInfo.parameters.debug != undefined && loaderInfo.parameters.debug == "true") {
                     throw new SecurityError(e.message);
                 }
             }
             catch(e:Error){
-                Utils.debug(e.message);
+                Utils.debug('registering external methods error: ' + e.message);
                 if (loaderInfo.parameters.debug != undefined && loaderInfo.parameters.debug == "true") {
                     throw new Error(e.message);
                 }
@@ -310,6 +315,7 @@ package{
         }
         
         private function onGetPropertyCalled(pPropertyName:String = ""):*{
+//            Utils.debug('getting prop: ' + pPropertyName);
 
             switch(pPropertyName){
                 case "mode":
@@ -393,6 +399,7 @@ package{
         }
         
         private function onSetPropertyCalled(pPropertyName:String = "", pValue:* = null):void{
+//            Utils.debug('setting prop: ' + pPropertyName + ' <= ' + pValue);
 
             switch(pPropertyName){
                 case "mode":
@@ -419,7 +426,7 @@ package{
                     break;
                 case "src":
                     _app.model.src = getSrcSupportingPseudostreaming(pValue);
-//                    Utils.debug('setter: ' + _app.model.src);
+//                    Utils.debug('setting src: ' + _app.model.src);
                     break;
                 case "currentTime":
 //                    Utils.debug('JS wants to seek to: ' + Number(pValue));
@@ -450,7 +457,7 @@ package{
 
         private function onSrcCalled(pSrc:* = ""):void {
             _app.model.src = getSrcSupportingPseudostreaming(pSrc);
-//            Utils.debug('on src: ' + _app.model.src);
+            Utils.debug('on src: ' + _app.model.src);
         }
         
         private function onLoadCalled():void{
@@ -473,10 +480,10 @@ package{
             _app.model.stop();
         }
 
-//        private function onUncaughtError(e:Event):void {
-//            e.preventDefault();
-//            Utils.debug('uncaught error: ' + e.toString());
-//        }
+        private function onUncaughtError(e:Event):void {
+            e.preventDefault();
+            Utils.debug('uncaught error: ' + e.toString());
+        }
 
         private function onShowControls():void {
             controls.show();
