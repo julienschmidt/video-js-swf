@@ -296,7 +296,16 @@ package com.videojs.providers{
         }
         
         public function die():void{
-            
+            if(_ns != null) {
+                _ns.close();
+                _ns = null;
+            }
+            if(_nc != null) {
+                _nc.close();
+                _nc = null;
+            }
+            _throughputTimer.stop();
+            _throughputTimer.reset();
         }
         
         private function initNetConnection():void{
@@ -311,6 +320,7 @@ package com.videojs.providers{
         private function initNetStream():void{
             if(_ns != null){
                 _ns.removeEventListener(NetStatusEvent.NET_STATUS, onNetStreamStatus);
+                _ns.close();
                 _ns = null;
             }
             _ns = new NetStream(_nc);
